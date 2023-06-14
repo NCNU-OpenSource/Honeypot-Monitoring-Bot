@@ -8,8 +8,9 @@
   - 整理蜜罐資訊並輸出統計圖表。
 ## Architecture
 - ![](https://hackmd.io/_uploads/SJV_1T8D3.png)
-  - 呈現被禁止 ip (封鎖暴力破解登入、蒐集被禁止 IP)
+  - 呈現被 blocked ip (蒐集被禁止 IP)
     - 當攻擊者嘗試 ssh 登入三次失敗後，會被 Fail2ban 封鎖一段時間，並且 Fail2Ban 會將 ban IP 傳送至 telegram bot 輸出通知我們。
+    - 防範暴力破解，避免產生過多 telegram 通知訊息
   - 攻擊通知
     - 攻擊者嘗試 ssh 登入，會進入密罐，所有攻擊者輸入的 password 會被即時轉傳到 telegram bot (對應是哪一個攻擊者 ip 輸入的用戶名/密碼)  
   - 即時監控
@@ -206,8 +207,10 @@ Honeypot_Monitoring_Bot/
     |________ telegram_notify.py
     |________ text_output.py
     |________ graph_output.py
+    |________ line_chart_output.py
+    |
     |________ img/
-    |          |____ (存放 graph_output.py 輸出的圖片)
+    |          |____ (存放輸出的圖片)
     |
     |________ other/
     |          |____  telegram.py 
@@ -256,8 +259,9 @@ Honeypot_Monitoring_Bot/
 - 使用者傳送 `send_result` ，bot 回傳一段文字的統計數據
   - ![](https://hackmd.io/_uploads/r1PeXZPv3.png)
   - ![](https://hackmd.io/_uploads/rkuf7Wvvn.png)
-  - ![](https://hackmd.io/_uploads/S18m7WvP3.png) 
-
+  - ![](https://hackmd.i，o/_uploads/S18m7WvP3.png) 
+- 使用者傳送 `conn_line_chart`，近期(十天)連線次數折線圖
+  - ![](https://hackmd.io/_uploads/Sky_-hDPn.png)
 
 ## 碰到的問題
 #### 問題 1 : 使用 ssh 連線時線出現錯誤
