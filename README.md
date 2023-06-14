@@ -1,7 +1,11 @@
-# Real-time Honeypot Monitoring Bot Assistant
+# Honeypot Monitoring Bot
+## 專題名稱 : 我的蜜罐「密」我，說你在壞壞
 ## Concept Development
-- 我們想透過設置 SSH honeypot (Cowrie) 檢測網路上有誰在 ssh 攻擊我們的系統，並有效紀錄其 ip address。
-- 許多網上實作大多已架設網站來呈現蜜罐裡的 log 資訊，不過我們將以通訊軟體 （telegram) 來即時呈現我們架設的密罐資訊，達到接收攻擊通知，或是 Fail2Ban 將試圖登入多次的 IP 封鎖的通知、以及即時監控攻擊者在蜜罐中的攻擊手段以及發動攻擊的方法，最後也能將蜜罐中的資訊整理輸出統計圖表。
+- Cowrie 是一個 SSH honeypot (蜜罐)，用於誘捕網路上有誰在 ssh 攻擊我們的系統，並且能夠獲取其輸入的 username、password、其他指令以及上傳下載的文件。
+- 許多網上實作大多已網頁形式呈現蜜罐裡的 log 資訊，不過本實作將採用通訊軟體 (telegram) 來即時呈現我們密罐的資訊，來達成以下功能:
+  - 即時收到攻擊通知、以及 Fail2Ban 封鎖的 IP 通知。
+  - 即時監控攻擊者在蜜罐中的攻擊手段以及發動攻擊的方法。
+  - 整理蜜罐資訊並輸出統計圖表。
 ## Architecture
 - ![](https://hackmd.io/_uploads/SJV_1T8D3.png)
   - 呈現被禁止 ip (封鎖暴力破解登入、蒐集被禁止 IP)
@@ -17,9 +21,9 @@
 
 - 硬體
   - 電腦(筆電) * 1 
-    - OS 以測試過 ubuntu 22.04 
+    - OS 安裝 ubuntu 22.04 
   - 行動裝置(手機) * 1 
-    - 下載 telegram app
+    - 下載 telegram app，並註冊帳號
 
 ## Existing Library/Software
 - Cowrie
@@ -29,12 +33,12 @@
   - Fail2Ban scans log files and bans IP addresses conducting too many failed login attempts.
   - Github 專案 : https://github.com/fail2ban/fail2ban
 - mySQL
-  - 是一個開放原始碼的關聯式資料庫管理系統 
+  - An open-source relational database management system. 
 - Telegram
-  - 是跨平台的即時通訊軟體，其用戶端是自由及開放原始碼軟體
+  - A cross-platform instant messaging software, and its client is free and open-source software.
 ## Implementation Process
 ### Step 1. 更改主機預設的 ssh port
-- 更改 `/etc/ssh/sshd_config` 的 Port 22222 (沒有人用的)
+- 更改 `/etc/ssh/sshd_config` 的 Port 22222 (沒有人用的 port)
 - ![](https://hackmd.io/_uploads/rkt7tL_Ih.png)
 - 重啟 ssh 服務
 ```cmd=
@@ -74,11 +78,6 @@ systemctl status ssh
     * `iptables -t nat -n -L PREROUTING`
 * 永久保存 iptables
     * `sudo apt-get install iptables-persistent`
-#### 補充 : 使用 ssh 連線時線出現錯誤
-![](https://hackmd.io/_uploads/HkXEGPuUh.png)
-* 刪除與連線 IP 相關的密鑰
-    * `ssh-keygen -R <要連線的 ip>`
-    * Ex. `ssh-keygen -R 10.107.38.92`
 #### 設定 cowrie honeypot
 - 以下操作都是使用 cowrie 身份在該啟用的虛擬環境中執行
 - 設定 假的 SSH、telnet 可使用的帳號密碼
@@ -90,11 +89,11 @@ systemctl status ssh
 #### 安裝
 - `sudo apt install fail2ban`
 #### 設定
-- 新增一個過濾檔 `/etc/fail2ban/filter.d/cowrie.conf`
+- `git clone https://github.com/CMSecurity/cowrie-fail2ban.git`
+- 將上述專案中的 `filter.d/cowrie.conf` 複製到 `/etc/fail2ban/filter.d/cowrie.conf`
   - ![](https://hackmd.io/_uploads/ryD67iOUn.png)
-- 新增一個設定檔 `/etc/fail2ban/jail.d/cowrie.conf`
+- 將上述專案中的 `jail.d/cowrie.conf` 複製到 `/etc/fail2ban/jail.d/cowrie.conf`
   - ![](https://hackmd.io/_uploads/Hkr-mi_Uh.png)
-
 - 記得將兩服務重啟
 ```cmd=
 sudo service fail2ban restart
@@ -111,6 +110,7 @@ sudo service fail2ban restart
   * 我們的使用者名稱 : `CowrieHoneypot_Bot` 
 * 得到 Telegram bot 的連結、token
 > token 記得妥善保管，以免其他人透過這組 token 操控你的機器人
+
 ![](https://hackmd.io/_uploads/BJbI1aZP2.jpg =60%x)
 
 #### fail2ban 訊息發送至 telegram bot
@@ -122,75 +122,28 @@ sudo service fail2ban restart
 ```
 - Download the file `telegram.conf` and move it to `/etc/fail2ban/action.d/` 
 - Download the file `send_telegram_notif.sh` move it to `/etc/fail2ban/scripts/`
-- Bot_Token : `9999999999:XXXXXXXXXXXXXXXXXXXXXXXXX`
-- 取得 ChatID
-  - ![](https://hackmd.io/_uploads/r1CHoq-w2.png)
 - Modify the file `/etc/fail2ban/scripts/send_telegram_notif.sh` and add your Token and your Chat ID:
 ```
 telegramBotToken=YOUR_BOT_TOKEN
 telegramChatID=YOUR_CHAT_ID
 ```
+- 取得 ChatID 方法
+  - ![](https://hackmd.io/_uploads/r1CHoq-w2.png)  
 - 增加執行權限:  `chmod +x /etc/fail2ban/scripts/send_telegram_notif.sh `
 - 重啟服務: `systemctl restart fail2ban`
 #### 將 cowrie 訊息即時發送至 telegram bot
+- 確認切換 `cowrie` 使用者，並且 python 虛擬環境啟動後
 - 編輯 `etc/cowrie.cfg`，找到 `[output_telegram]` ，注意 `bot_token` 跟 `chat_id` 不要改名稱，後面接的值改成自己 Bot 的值
 ```
 [output_telegram]
 enabled = true
-bot_token = 111111111:XXXXXXXXXXXXXXXXXXXXXXXX
-chat_id = 123456789
+bot_token = <填入自己 bot token>
+chat_id = <填入自己 bot chatID>
 ```
-- 編輯 `src/cowrie/output/telegram.py`
-```python=
-# Simple Telegram Bot logger
-
-from __future__ import absolute_import, division
-
-import urllib3
-import certifi
-from twisted.python import log
-from cowrie.core.config import CowrieConfig
-import cowrie.core.output
-
-class Output(cowrie.core.output.Output):
-    """
-    telegram output
-    """
-
-    def start(self):
-        self.bot_id = CowrieConfig.get("output_telegram","bot_token") # 改成自己的 bot token
-        self.chat_id = CowrieConfig.get("output_telegram","chat_id") # 改成自己的 chat_id
-
-    def stop(self):
-        pass
-
-    def write(self, logentry):
-        for i in list(logentry.keys()):
-            # remove twisted 15 legacy keys
-            if i.startswith('log_'):
-                del logentry[i]
-
-        if "login attempt" in logentry['message']:
-            msgtxt = "[cowrie] " + logentry['timestamp']
-            msgtxt += "  " + logentry['message']
-            msgtxt += "  (session " + logentry['session'] + ")"
-            msgtxt += "  (source ip " + logentry['src_ip'] + ")"
-            try:
-                https = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
-                r = https.request('GET', 'https://api.telegram.org/bot' + self.bot_id + '/sendMessage?chat_id=' + str(self.chat_id) + '&text=' + msgtxt)
-            except urllib3.exceptions.SSLError as err:
-                print('[ERROR] Telegram SSL error', err)
-        elif "CMD" in logentry['message']:
-            msgtxt = "cowrie" + logentry['timestamp']
-            msgtxt += "   " + logentry['message']
-            msgtxt += "   (session " + logentry['session'] + ")"
-            msgtxt += "   (source ip " + logentry['src_ip'] + ")"
-            try:
-                https = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
-                r = https.request('GET', 'https://api.telegram.org/bot' + self.bot_id + '/sendMessage?chat_id=' + str(self.chat_id) + '&text=' + msgtxt)
-            except urllib3.exceptions.SSLError as err:
-                print('[ERROR] Telegram SSL error', err)
-```
+- `cd /home/cowrie`
+- `git clone https://github.com/wyping314/Honeypot-Monitoring-Bot.git`
+- 將我們專案的 `other/` 資料夾下的 telegram.py 複製到 `src/cowrie/output/telegram.py`
+  - `sudo cp /home/cowrie/cowrie/Honeypot-Monitoring-Bot/other/telegram.py /home/cowrie/cowrie/src/cowrie/output/telegram.py`
 ### Step 5. 配置 MySQL 
 - 安裝 mysql
 ```terminal=
@@ -244,12 +197,10 @@ debug = false
   - `tail -f ~/cowrie/var/log/cowrie/cowrie.log`
   - ![](https://hackmd.io/_uploads/HJGAglQv3.png)
 ### Step 6. 放入此專案的 Python Script 
-- 使用 `cowrie` 使用者，python 虛擬環境啟動後
-- `cd /home/cowrie`
-- `git clone https://github.com/wyping314/Real-time-Honeypot-Monitoring-Bot-Assistant.git`
+
 - 此專案的架構
 ```
-Real-time_Honeypot_Monitoring_Bot/
+Honeypot_Monitoring_Bot/
     |
     |________ requirements.txt
     |________ telegram_notify.py
@@ -258,15 +209,18 @@ Real-time_Honeypot_Monitoring_Bot/
     |________ img/
     |          |____ (存放 graph_output.py 輸出的圖片)
     |
+    |________ other/
+    |          |____  telegram.py 
+    |
     |________ README.md
     
 ```
 - 安裝此專案需要的依賴項
   - `pip install -r requirements.txt`
 - 檢查 mysql 連線設定
-  - 修改 `text_output.py`、`graph_output.py`、 `tty_output.py`
+  - 修改 `text_output.py`、`graph_output.py`
 - 檢查 telegram bot 連線設定 
-  - 修改 `telegram_notify.py` token
+  - 修改 `telegram_notify.py` token 名稱
 - 啟動 `telegram_notify.py`
   - `python3 telegram_notify.py`
 ## Installation
@@ -284,7 +238,7 @@ Real-time_Honeypot_Monitoring_Bot/
 - 如果上述皆有運行，就可以測試自己的 telegram bot 
 
 ## Usage
-### 展示 Real-time Honeypot Monitoring Bot 的功能
+### 展示 Honeypot Monitoring Bot 的功能
 - 接收 fail2ban 所 ban / uban ip address 
   - ![](https://hackmd.io/_uploads/HJBIDbvwh.png)
 - 即時地接收成功登入的攻擊者，所下的所有指令(需對應攻擊者 ip)
@@ -304,10 +258,14 @@ Real-time_Honeypot_Monitoring_Bot/
   - ![](https://hackmd.io/_uploads/rkuf7Wvvn.png)
   - ![](https://hackmd.io/_uploads/S18m7WvP3.png) 
 
-- 傳送 show_tty 指令，將指定的 tty 文件執行 playlog，重現攻擊者在密罐中的所有過程
 
 ## 碰到的問題
-
+#### 問題 1 : 使用 ssh 連線時線出現錯誤
+![](https://hackmd.io/_uploads/HkXEGPuUh.png)
+* 刪除與連線 IP 相關的密鑰
+    * `ssh-keygen -R <要連線的 ip>`
+    * Ex. `ssh-keygen -R 10.107.38.92`
+#### 問題 2 : 原先想透過 playlog 執行 tty session log ，重現攻擊者在密罐中的所有過程
 ## Job Assignment
 - 建立 MySQL，python 圖表視覺化輸出 : `王念祖`
 - telegram bot 架設、撰寫 python 程式與 telegram 互動  : `王詠平`
@@ -321,3 +279,4 @@ Real-time_Honeypot_Monitoring_Bot/
 - [nuno-carvalho / cowrie-output-telegram](https://github.com/nuno-carvalho/cowrie-output-telegram)
 - [jasonmpittman / cowrie-log-analyzer](https://github.com/jasonmpittman/cowrie-log-analyzer)
 - [How to Send Cowrie output to a MySQL Database](https://cowrie.readthedocs.io/en/latest/sql/README.html)
+- [CMSecurity / cowrie-fail2ban](https://github.com/CMSecurity/cowrie-fail2ban)
