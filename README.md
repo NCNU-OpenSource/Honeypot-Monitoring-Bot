@@ -1,24 +1,20 @@
 # Real-time Honeypot Monitoring Bot Assistant
 ## Concept Development
-- 因為接觸資安領域，想學習攻擊者如何在進入系統後進行攻擊的技巧與方法，透過網路查詢通常不太可能有太多實務上的攻擊技巧可以透漏，因此我們想藉由密罐蒐集這類資訊，透過 telegram 即時通知我們，現在有攻擊者在我們架設的密罐上的偽系統中下的指令，使我們能夠及時收看一場場精彩的攻擊轉播。
-
+- 我們想透過設置 SSH honeypot (Cowrie) 檢測網路上有誰在 ssh 攻擊我們的系統，並有效紀錄其 ip address。
+- 許多網上實作大多已架設網站來呈現蜜罐裡的 log 資訊，不過我們將以通訊軟體 （telegram) 來即時呈現我們架設的密罐資訊，達到接收攻擊通知，或是 Fail2Ban 將試圖登入多次的 IP 封鎖的通知、以及即時監控攻擊者在蜜罐中的攻擊手段以及發動攻擊的方法，最後也能將蜜罐中的資訊整理輸出統計圖表。
 ## Architecture
-- ![](https://hackmd.io/_uploads/rkbv1XIv3.png)
-  - 呈現被禁止 ip (封鎖暴力破解登入並蒐集被禁止 IP)
-    - 當攻擊者嘗試 ssh 登入三次後，會被 Fail2ban 封鎖一段時間，並且 Fail2Ban 會將 ban IP 傳送至 telegram bot 輸出通知我們。
+- ![](https://hackmd.io/_uploads/SJV_1T8D3.png)
+  - 呈現被禁止 ip (封鎖暴力破解登入、蒐集被禁止 IP)
+    - 當攻擊者嘗試 ssh 登入三次失敗後，會被 Fail2ban 封鎖一段時間，並且 Fail2Ban 會將 ban IP 傳送至 telegram bot 輸出通知我們。
   - 攻擊通知
     - 攻擊者嘗試 ssh 登入，會進入密罐，所有攻擊者輸入的 password 會被即時轉傳到 telegram bot (對應是哪一個攻擊者 ip 輸入的用戶名/密碼)  
-  - 監控
+  - 即時監控
     - 當今天攻擊者成功 ssh 登入，會進入密罐事先設定好的假作業系統環境，攻擊者在裡頭輸入的指令與 wget 下載的檔案，都會被即時紀錄並轉傳到 telegram bot 
     - 訊息會對應是哪一個攻擊者 ip 輸入的指令
   - 顯示分析報告 
-    - 系統管理員能向 telegram bot 發送特定指令，使其統整現有密罐所蒐集來的資訊，並製作圖表傳送到 Telegram。
+    - 透過向 telegram bot 發送命令，統計 ssh 登入蜜罐所用的 username / password 或 常見的攻擊者 IP，並繪製成圖表，視覺化呈現在 telegram 上，作為我們參考的依據。
 ## Implementation Resources
-- 軟體
-  - cowrie
-  - fail2ban 
-  - mysql 
-  - telegram
+
 - 硬體
   - 電腦(筆電) * 1 
     - OS 以測試過 ubuntu 22.04 
@@ -32,6 +28,8 @@
 - Fail2Ban 
   - Fail2Ban scans log files and bans IP addresses conducting too many failed login attempts.
   - Github 專案 : https://github.com/fail2ban/fail2ban
+- mySQL
+  - 是一個開放原始碼的關聯式資料庫管理系統 
 - Telegram
   - 是跨平台的即時通訊軟體，其用戶端是自由及開放原始碼軟體
 ## Implementation Process
@@ -71,7 +69,7 @@ systemctl status ssh
     * `exit` 
        * 先回到主機環境
     * `sudo iptables -t nat -A PREROUTING -p tcp --dport 22 -j REDIRECT --to-port 2222`
-#### 補充 : 自動啟用 iptables 設定
+#### 自動啟用 iptables 設定
 * 查看目前 iptables nat 表裡面的 PREROUTING chain
     * `iptables -t nat -n -L PREROUTING`
 * 永久保存 iptables
@@ -132,14 +130,14 @@ sudo service fail2ban restart
 telegramBotToken=YOUR_BOT_TOKEN
 telegramChatID=YOUR_CHAT_ID
 ```
-- `chmod +x /etc/fail2ban/scripts/send_telegram_notif.sh `
-- `systemctl restart fail2ban`
+- 增加執行權限:  `chmod +x /etc/fail2ban/scripts/send_telegram_notif.sh `
+- 重啟服務: `systemctl restart fail2ban`
 #### 將 cowrie 訊息即時發送至 telegram bot
 - 編輯 `etc/cowrie.cfg`，找到 `[output_telegram]` ，注意 `bot_token` 跟 `chat_id` 不要改名稱，後面接的值改成自己 Bot 的值
 ```
 [output_telegram]
 enabled = true
-bot_token = 5922090657:AAEVkZJ3XXXXXXXXXXXXXXXXXX
+bot_token = 111111111:XXXXXXXXXXXXXXXXXXXXXXXX
 chat_id = 123456789
 ```
 - 編輯 `src/cowrie/output/telegram.py`
@@ -246,7 +244,7 @@ debug = false
   - `tail -f ~/cowrie/var/log/cowrie/cowrie.log`
   - ![](https://hackmd.io/_uploads/HJGAglQv3.png)
 ### Step 6. 放入此專案的 Python Script 
-- 使用 `cowrie` 使用者在 python 虛擬環境中
+- 使用 `cowrie` 使用者，python 虛擬環境啟動後
 - `cd /home/cowrie`
 - `git clone https://github.com/wyping314/Real-time-Honeypot-Monitoring-Bot-Assistant.git`
 - 此專案的架構
@@ -260,31 +258,52 @@ Real-time_Honeypot_Monitoring_Bot/
     |________ img/
     |          |____ (存放 graph_output.py 輸出的圖片)
     |
-    |________ tty_output.py
-    |________ video/
-    |          |_____ (存放 tty_output.py 輸出的影片)
-    |
     |________ README.md
     
 ```
 - 安裝此專案需要的依賴項
-  - `pip install --upgrade -r requirements.txt`
+  - `pip install -r requirements.txt`
 - 檢查 mysql 連線設定
   - 修改 `text_output.py`、`graph_output.py`、 `tty_output.py`
 - 檢查 telegram bot 連線設定 
-  - 修改 `telegram_notify.py` token 以及
+  - 修改 `telegram_notify.py` token
 - 啟動 `telegram_notify.py`
   - `python3 telegram_notify.py`
 ## Installation
-- 當完成上述 inmpletation process，之後要安裝只要確認以下
-  - 確認 python script 是否運行 
-## Usage
+- 當完成上述 impletation process 後，之後只要確認以下事項:
+  - Cowrie Honeypot 是否啟動
+    - 啟動服務:`/home/cowrie/cowrie/bin/cowrie start`
+    - 確認狀態:`/home/cowrie/cowrie/bin/cowrie status` 
+  - Fail2Ban 是否啟動
+    - 啟動服務: `service fail2ban start` 
+    - 確認狀態: `service fail2ban status` 
+  - MySQL 是否啟動
+    - 啟動服務: `service mysql start` 
+    - 確認狀態: `service mysql status` 
+  - 確認 `telegram_notify.py` 是否運行
+- 如果上述皆有運行，就可以測試自己的 telegram bot 
 
-### Demo Telegram Bot 功能
+## Usage
+### 展示 Real-time Honeypot Monitoring Bot 的功能
 - 接收 fail2ban 所 ban / uban ip address 
+  - ![](https://hackmd.io/_uploads/HJBIDbvwh.png)
 - 即時地接收成功登入的攻擊者，所下的所有指令(需對應攻擊者 ip)
-- 傳送 ip_graph ，bot 回傳前十大 ip address 長條圖
-- 傳送 user_passwd_graph ，bot 回傳前十大頻繁的用戶名密碼長條圖
+  - ![](https://hackmd.io/_uploads/Bk7RIWwwh.png) 
+  - ![](https://hackmd.io/_uploads/BkNYUWDwh.png)
+- 使用者傳送 `ip_analysis` ，bot 回傳前十大頻繁 ssh 登入該蜜罐的 ip address 長條圖
+  - ![](https://hackmd.io/_uploads/rktx0xDvn.png)
+- 使用者傳送 `/username_analysis` ，bot 會回傳該蜜罐被 ssh 登入時，前十大頻繁輸入的 username 長條圖
+  - ![](https://hackmd.io/_uploads/rJXa0ePPh.png) 
+- 使用者傳送 `/password_analysis` ，bot 會回傳該蜜罐被 ssh 登入時，前十大頻繁輸入的 password 長條圖
+  - ![](https://hackmd.io/_uploads/BJGY-bvDh.png) 
+- 使用者傳送 `/user_passwd_analysis`， bot 回傳前十大頻繁 ssh 登入該蜜罐的 username / passeord 組合長條圖
+  - ![](https://hackmd.io/_uploads/Hk9RhlDPh.png)
+  - ![](https://hackmd.io/_uploads/SkghIaeww2.png)
+- 使用者傳送 `send_result` ，bot 回傳一段文字的統計數據
+  - ![](https://hackmd.io/_uploads/r1PeXZPv3.png)
+  - ![](https://hackmd.io/_uploads/rkuf7Wvvn.png)
+  - ![](https://hackmd.io/_uploads/S18m7WvP3.png) 
+
 - 傳送 show_tty 指令，將指定的 tty 文件執行 playlog，重現攻擊者在密罐中的所有過程
 
 ## 碰到的問題
@@ -298,6 +317,7 @@ Real-time_Honeypot_Monitoring_Bot/
 ## 感謝名單
 - `陳柏瑋` : 題材發想
 ## References
-- https://github.com/deividgdt/fail2ban_telegram_notifications
-- https://github.com/nuno-carvalho/cowrie-output-telegram
-- https://github.com/jasonmpittman/cowrie-log-analyzer
+- [deividgdt / fail2ban_telegram_notifications](https://github.com/deividgdt/fail2ban_telegram_notifications)
+- [nuno-carvalho / cowrie-output-telegram](https://github.com/nuno-carvalho/cowrie-output-telegram)
+- [jasonmpittman / cowrie-log-analyzer](https://github.com/jasonmpittman/cowrie-log-analyzer)
+- [How to Send Cowrie output to a MySQL Database](https://cowrie.readthedocs.io/en/latest/sql/README.html)
