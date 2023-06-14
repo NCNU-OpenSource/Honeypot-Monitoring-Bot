@@ -35,6 +35,14 @@ async def send_photo_user_pass(update: Update, context: ContextTypes.DEFAULT_TYP
     with open(photo_path, "rb") as photo_file:
         await context.bot.send_photo(chat_id=chat_id, photo=InputFile(photo_file))
 
+async def send_line_chart(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    subprocess.run(["python3","/home/cowrie/Honeypot-Monitoring-Bot/line_chart_output.py"])
+    photo_path = "/home/cowrie/Real-time-Honeypot-Monitoring-Bot-Assistant/img/last_10_days_conn_line_chart.png"
+    chat_id = update.effective_chat.id
+
+    with open(photo_path, "rb") as photo_file:
+        await context.bot.send_photo(chat_id=chat_id, photo=InputFile(photo_file))
+
 async def send_result(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     command = "python3 /home/cowrie/Honeypot-Monitoring-Bot/text_output.py"
 
@@ -51,6 +59,7 @@ app.add_handler(CommandHandler("ip_analysis", send_photo_ip))
 app.add_handler(CommandHandler("username_analysis", send_photo_username))
 app.add_handler(CommandHandler("password_analysis", send_photo_password))
 app.add_handler(CommandHandler("user_pass_analysis", send_photo_user_pass))
+app.add_handler(CommandHandler("conn_line_chart", send_line_chart))
 app.add_handler(CommandHandler("sendresult", send_result))
 
 
