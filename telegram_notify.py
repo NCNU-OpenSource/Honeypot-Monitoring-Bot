@@ -4,39 +4,39 @@ import requests
 import subprocess
 
 async def send_photo_ip(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    subprocess.run(["python3","/home/cowrie/Real-time_Honeypot_Monitoring_Bot/graph_output.py"])
-    photo_path = "/home/cowrie/Real-time_Honeypot_Monitoring_Bot/img/ip.png"
+    subprocess.run(["python3","/home/cowrie/Real-time-Honeypot-Monitoring-Bot-Assistant/graph_output.py"])
+    photo_path = "/home/cowrie/Real-time-Honeypot-Monitoring-Bot-Assistant/img/ip.png"
     chat_id = update.effective_chat.id
 
     with open(photo_path, "rb") as photo_file:
         await context.bot.send_photo(chat_id=chat_id, photo=InputFile(photo_file))
 
 async def send_photo_username(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    subprocess.run(["python3","/home/cowrie/Real-time_Honeypot_Monitoring_Bot/graph_output.py"])
-    photo_path = "/home/cowrie/Real-time_Honeypot_Monitoring_Bot/img/username.png"
+    subprocess.run(["python3","/home/cowrie/Real-time-Honeypot-Monitoring-Bot-Assistant/graph_output.py"])
+    photo_path = "/home/cowrie/Real-time-Honeypot-Monitoring-Bot-Assistant/img/username.png"
     chat_id = update.effective_chat.id
 
     with open(photo_path, "rb") as photo_file:
         await context.bot.send_photo(chat_id=chat_id, photo=InputFile(photo_file))
 
 async def send_photo_password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    subprocess.run(["python3","/home/cowrie/Real-time_Honeypot_Monitoring_Bot/graph_output.py"])
-    photo_path = "/home/cowrie/Real-time_Honeypot_Monitoring_Bot/img/password.png"
+    subprocess.run(["python3","/home/cowrie/Real-time-Honeypot-Monitoring-Bot-Assistant/graph_output.py"])
+    photo_path = "/home/cowrie/Real-time-Honeypot-Monitoring-Bot-Assistant/img/password.png"
     chat_id = update.effective_chat.id
 
     with open(photo_path, "rb") as photo_file:
         await context.bot.send_photo(chat_id=chat_id, photo=InputFile(photo_file))
 
 async def send_photo_user_pass(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    subprocess.run(["python3","/home/cowrie/Real-time_Honeypot_Monitoring_Bot/graph_output.py"])
-    photo_path = "/home/cowrie/Real-time_Honeypot_Monitoring_Bot/img/user_pass.png"
+    subprocess.run(["python3","/home/cowrie/Real-time-Honeypot-Monitoring-Bot-Assistant/graph_output.py"])
+    photo_path = "/home/cowrie/Real-time-Honeypot-Monitoring-Bot-Assistant/img/user_pass.png"
     chat_id = update.effective_chat.id
 
     with open(photo_path, "rb") as photo_file:
         await context.bot.send_photo(chat_id=chat_id, photo=InputFile(photo_file))
 
 async def send_result(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    command = "python3 /home/cowrie/Real-time_Honeypot_Monitoring_Bot/text_output.py"
+    command = "python3 /home/cowrie/Real-time-Honeypot-Monitoring-Bot-Assistant/text_output.py"
 
     result = subprocess.check_output(command, shell=True, text=True)
 
