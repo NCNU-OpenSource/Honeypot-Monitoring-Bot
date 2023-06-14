@@ -1,8 +1,8 @@
 # Honeypot Monitoring Bot
 ## 專題名稱 : 我的蜜罐「密」我，說你在壞壞
 ## Concept Development
-- Cowrie 是一個 SSH honeypot (蜜罐)，用於誘捕網路上有誰在 ssh 攻擊我們的系統，並且能夠獲取其輸入的 username、password、其他指令以及上傳下載的文件。
-- 許多網上實作大多已網頁形式呈現蜜罐裡的 log 資訊，不過本實作將採用通訊軟體 (telegram) 來即時呈現我們密罐的資訊，來達成以下功能:
+- Cowrie 是一個 SSH honeypot (蜜罐)，用於誘捕網路上有誰在 ssh 攻擊我們的系統，並且能夠獲取其輸入的 username、password、以及進入系統後執行的指令和上傳下載的文件。
+- 網上實作大多已網頁形式呈現蜜罐裡的 log 資訊，不過本實作將採用通訊軟體 (telegram) 來即時呈現我們密罐的資訊，並達成以下功能:
   - 即時收到攻擊通知、以及 Fail2Ban 封鎖的 IP 通知。
   - 即時監控攻擊者在蜜罐中的攻擊手段以及發動攻擊的方法。
   - 整理蜜罐資訊並輸出統計圖表。
@@ -90,9 +90,9 @@ systemctl status ssh
 - `sudo apt install fail2ban`
 #### 設定
 - `git clone https://github.com/CMSecurity/cowrie-fail2ban.git`
-- 將上述專案中的 `filter.d/cowrie.conf` 複製到 `/etc/fail2ban/filter.d/cowrie.conf`
+- 將 cowrie-fail2ban 專案中將 `filter.d/cowrie.conf` 複製到 `/etc/fail2ban/filter.d/cowrie.conf`
   - ![](https://hackmd.io/_uploads/ryD67iOUn.png)
-- 將上述專案中的 `jail.d/cowrie.conf` 複製到 `/etc/fail2ban/jail.d/cowrie.conf`
+- 將 cowrie-fail2ban 專案中將 `jail.d/cowrie.conf` 複製到 `/etc/fail2ban/jail.d/cowrie.conf`
   - ![](https://hackmd.io/_uploads/Hkr-mi_Uh.png)
 - 記得將兩服務重啟
 ```cmd=
@@ -265,13 +265,13 @@ Honeypot_Monitoring_Bot/
 * 刪除與連線 IP 相關的密鑰
     * `ssh-keygen -R <要連線的 ip>`
     * Ex. `ssh-keygen -R 10.107.38.92`
-#### 問題 2 : 原先想透過 playlog 執行 tty session log ，重現攻擊者在密罐中的所有過程
+
 ## Job Assignment
 - 建立 MySQL，python 圖表視覺化輸出 : `王念祖`
 - telegram bot 架設、撰寫 python 程式與 telegram 互動  : `王詠平`
 - 其他部份 : `王念祖` 、 `王詠平`
   - 建立與設定 Cowrie、Fail2Ban
-  - 撰寫文件 
+  - 撰寫文件、製作簡報
 ## 感謝名單
 - `陳柏瑋` : 題材發想
 ## References
