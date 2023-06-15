@@ -37,8 +37,8 @@
     - 透過向 telegram bot 發送命令，統計 ssh 登入蜜罐所用的 username / password 或 常見的攻擊者 IP，並繪製成圖表，視覺化呈現在 telegram 上，作為我們參考的依據。
 ## Implementation Process
 ### Step 1. 更改主機預設的 ssh port
-- 更改 `/etc/ssh/sshd_config` 的 Port 22222 (沒有人用的 port)
-- ![](https://hackmd.io/_uploads/rkt7tL_Ih.png)
+- 更改 `/etc/ssh/sshd_config` 的 Port 60022 (沒有人用的 port)（建議在60000以上，可以防止被nmap掃到）
+- ![](https://hackmd.io/_uploads/rk3-xmuw3.png)
 - 重啟 ssh 服務
 ```cmd=
 systemctl restart ssh
@@ -239,6 +239,9 @@ Honeypot_Monitoring_Bot/
 - 如果上述皆有運行，就可以測試自己的 telegram bot 
 
 ## Usage
+### 掃描該密罐主機
+- ![](https://hackmd.io/_uploads/ryhADzuP2.png)
+  - 記得啟用 cowrie 才會看到假的 22 port 開啟
 ### 展示 Honeypot Monitoring Bot 的功能
 - 接收 fail2ban 所 ban / uban ip address 
   - ![](https://hackmd.io/_uploads/HJBIDbvwh.png)
