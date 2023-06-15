@@ -60,7 +60,7 @@ app.add_handler(CommandHandler("username_analysis", send_photo_username))
 app.add_handler(CommandHandler("password_analysis", send_photo_password))
 app.add_handler(CommandHandler("user_pass_analysis", send_photo_user_pass))
 app.add_handler(CommandHandler("conn_line_chart", send_line_chart))
-app.add_handler(CommandHandler("sendresult", send_result))
+app.add_handler(CommandHandler("send_result", send_result))
 
 
 app.run_polling()
