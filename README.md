@@ -1,5 +1,4 @@
-# Honeypot Monitoring Bot
-## 專題名稱 : 我的蜜罐「密」我，說你在壞壞
+# 我的蜜罐「密」我，說你在壞壞
 ## Concept Development
 - Cowrie 是一個 SSH honeypot (蜜罐)，用於誘捕網路上有誰在 ssh 攻擊我們的系統，並且能夠獲取其輸入的 username、password、以及進入系統後執行的指令和上傳下載的文件。
 - 網上實作大多已網頁形式呈現蜜罐裡的 log 資訊，不過本實作將採用通訊軟體 (telegram) 來即時呈現我們密罐的資訊，並達成以下功能:
@@ -7,7 +6,7 @@
   - 即時監控攻擊者在蜜罐中的攻擊手段以及發動攻擊的方法。
   - 整理蜜罐資訊並輸出統計圖表。
 ## Architecture
-- ![](https://hackmd.io/_uploads/SJV_1T8D3.png)
+- ![](https://hackmd.io/_uploads/rJpC23PP2.png)
   - 呈現被 blocked ip (蒐集被禁止 IP)
     - 當攻擊者嘗試 ssh 登入三次失敗後，會被 Fail2ban 封鎖一段時間，並且 Fail2Ban 會將 ban IP 傳送至 telegram bot 輸出通知我們。
     - 防範暴力破解，避免產生過多 telegram 通知訊息
@@ -277,7 +276,10 @@ Honeypot_Monitoring_Bot/
   - 建立與設定 Cowrie、Fail2Ban
   - 撰寫文件、製作簡報
 ## 感謝名單
-- `陳柏瑋` : 題材發想
+- 題材發想 : `陳柏瑋` ([@PengLaiRenOu](https://github.com/PengLaiRenOu)) 
+- 電腦提供 : `吳梓睿` ([@wzray07](https://github.com/wzray07)) 
+## 簡報連結:
+- https://www.canva.com/design/DAFlt7A38go/9LcdHx21LgAw_DWTCpC0ug/view?utm_content=DAFlt7A38go&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink
 ## References
 - [deividgdt / fail2ban_telegram_notifications](https://github.com/deividgdt/fail2ban_telegram_notifications)
 - [nuno-carvalho / cowrie-output-telegram](https://github.com/nuno-carvalho/cowrie-output-telegram)
