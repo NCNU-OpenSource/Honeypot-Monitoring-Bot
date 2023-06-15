@@ -61,7 +61,7 @@ def query_top_ten_graph(conn, col, table):
     #dt_format = dt_now.strftime('%Y年%m月%d日_%H:%M:%S')
     dt_title = dt_now.strftime('%Y-%m-%d_%H:%M:%S')
     plt.title(f"""{dt_title}_top_ten_{col}_graph""")
-    plt.xlabel('{col}')
+    plt.xlabel(f"""{col}""")
     plt.ylabel('Frequency')
     plt.savefig(f"""./img/{col}.png""")
     #plt.savefig(f"""./img/{dt_format}_{col}.png""")
