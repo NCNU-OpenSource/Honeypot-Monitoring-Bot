@@ -110,7 +110,7 @@ sudo service fail2ban restart
 * 得到 Telegram bot 的連結、token
 > token 記得妥善保管，以免其他人透過這組 token 操控你的機器人
 
-![](https://hackmd.io/_uploads/BJbI1aZP2.jpg =60%x)
+![](https://hackmd.io/_uploads/r1Qf4S_wh.png)
 
 #### fail2ban 訊息發送至 telegram bot
 - `git clone https://github.com/deividgdt/fail2ban_telegram_notifications`
