@@ -1,24 +1,11 @@
 # 我的蜜罐「密」我，說你在壞壞
 ## Concept Development
-- Cowrie 是一個 SSH honeypot (蜜罐)，用於誘捕網路上有誰在 ssh 攻擊我們的系統，並且能夠獲取其輸入的 username、password、以及進入系統後執行的指令和上傳下載的文件。
-- 網上實作大多已網頁形式呈現蜜罐裡的 log 資訊，不過本實作將採用通訊軟體 (telegram) 來即時呈現我們密罐的資訊，並達成以下功能:
-  - 即時收到攻擊通知、以及 Fail2Ban 封鎖的 IP 通知。
-  - 即時監控攻擊者在蜜罐中的攻擊手段以及發動攻擊的方法。
-  - 整理蜜罐資訊並輸出統計圖表。
-## Architecture
-- ![](https://hackmd.io/_uploads/rJpC23PP2.png)
-  - 呈現被 blocked ip (蒐集被禁止 IP)
-    - 當攻擊者嘗試 ssh 登入三次失敗後，會被 Fail2ban 封鎖一段時間，並且 Fail2Ban 會將 ban IP 傳送至 telegram bot 輸出通知我們。
-    - 防範暴力破解，避免產生過多 telegram 通知訊息
-  - 攻擊通知
-    - 攻擊者嘗試 ssh 登入，會進入密罐，所有攻擊者輸入的 password 會被即時轉傳到 telegram bot (對應是哪一個攻擊者 ip 輸入的用戶名/密碼)  
-  - 即時監控
-    - 當今天攻擊者成功 ssh 登入，會進入密罐事先設定好的假作業系統環境，攻擊者在裡頭輸入的指令與 wget 下載的檔案，都會被即時紀錄並轉傳到 telegram bot 
-    - 訊息會對應是哪一個攻擊者 ip 輸入的指令
-  - 顯示分析報告 
-    - 透過向 telegram bot 發送命令，統計 ssh 登入蜜罐所用的 username / password 或 常見的攻擊者 IP，並繪製成圖表，視覺化呈現在 telegram 上，作為我們參考的依據。
+- 我們想架設一個 SSH 密罐，監控誰會 ssh 攻擊我們的系統，但觀察網上大多使用網頁形式呈現密罐資訊，其未有即時性通知功能，因此本專案選用 Telegram bot 作為監控平台，以便我們能夠即時收到攻擊通知，並即時監控攻擊者在蜜罐中的攻擊手段和方法。
+- 除了即時性外，還有幾點好處:
+  * 一、 telegram 可以跨多平台 / 裝置運行。
+  * 二、下達特定指令，telegram bot  回傳當前分析蜜罐資訊，並以圖表或文字呈現。
+  * 三、輕鬆實現保密性，可以僅允許授權的帳號使用
 ## Implementation Resources
-
 - 硬體
   - 電腦(筆電) * 1 
     - OS 安裝 ubuntu 22.04 
@@ -36,6 +23,18 @@
   - An open-source relational database management system. 
 - Telegram
   - A cross-platform instant messaging software, and its client is free and open-source software.
+## Architecture
+- ![](https://hackmd.io/_uploads/rJpC23PP2.png)
+  - 呈現被 blocked IP address
+    - 當攻擊者嘗試 ssh 登入三次失敗後，會被 Fail2ban 封鎖一段時間，並且 Fail2Ban 會將 ban IP 傳送至 telegram bot 輸出通知我們。
+    - 防範暴力破解，避免產生過多 telegram 通知訊息
+  - 攻擊通知
+    - 攻擊者嘗試 ssh 登入，會進入密罐，所有攻擊者輸入的 password 會被即時轉傳到 telegram bot (對應是哪一個攻擊者 ip 輸入的用戶名/密碼)  
+  - 即時監控
+    - 當今天攻擊者成功 ssh 登入，會進入密罐事先設定好的假作業系統環境，攻擊者在裡頭輸入的指令與 wget 下載的檔案，都會被即時紀錄並轉傳到 telegram bot 
+    - 訊息會對應是哪一個攻擊者 ip 輸入的指令
+  - 顯示分析報告 
+    - 透過向 telegram bot 發送命令，統計 ssh 登入蜜罐所用的 username / password 或 常見的攻擊者 IP，並繪製成圖表，視覺化呈現在 telegram 上，作為我們參考的依據。
 ## Implementation Process
 ### Step 1. 更改主機預設的 ssh port
 - 更改 `/etc/ssh/sshd_config` 的 Port 22222 (沒有人用的 port)
